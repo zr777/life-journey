@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <title>leadlet+高德地图 测试</title>
+    <!-- <meta charset="utf-8" /> -->
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/vue.resource/1.2.0/vue-resource.min.js"></script>
+</head>
+
+<body>
+    <!-- <div id="mapid" style="width:600px; height:400px"></div> -->
+    <div id="mapid" style="height:800px"></div>
+    <!-- 必须指定高度 -->
+
+    <a href="/upload">上传图片<a>
+
+    <script>
+        var someData;
+        var app = new Vue({
+            el: '#mapid',
+            data: {
+                message: 'Hello Vue!'
+            },
+            mounted: function () {
+                this.$nextTick(function () {
+                    // 代码保证 this.$el 在 document 中
+                    this.initMap();
+                    this.placeAjax();
+                })
+            },
+            methods: {
+                initMap() {
+                    this.mymap = L.map('mapid', {
+                        zoom: 7, //初始聚焦程度
+                        center: [23.16, 113.23], //广州 [lat, lng] [纬度, 经度]
+                        minZoom: 3, //最宽广，越小越宽广
+                        maxZoom: 18, //最细致，越大越细致
+                    });
+                    L.tileLayer(
+                        'https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
+                            subdomains: ["1", "2", "3", "4"], //可用子域名，用于浏览器并发请求
+                            attribution: "&copy; 高德地图", //可以修改为其它内容
+                        }).addTo(this.mymap); //添加tile层到地图
+
+                    this.popup = L.popup();
+                    this.mymap.on('click', this.onMapClick);
+                },
+                onMapClick(e) {
+                    this.popup
+                        .setLatLng(e.latlng)
+                        .setContent("您所点击的位置的经纬度为" + '<br>' + e.latlng['lng'] + '<br>' + e.latlng['lat'])
+                        .openOn(this.mymap);
+                },
+                addMarker(lat, lng, imgsrc) {
+                    var guangZhouTa = [lat, lng];
+                    var marker = L.marker(guangZhouTa).addTo(this.mymap);
+
+                    var popupContent = document.createElement("img");
+                    popupContent.onload = function () {
+                        // marker.openPopup();
+                        marker.update();
+                    };
+                    popupContent.src = imgsrc;
+                    popupContent.style.width = '500px';
+                    marker.bindPopup(popupContent, {
+                        maxWidth: "auto"
+                    }); //为了图片出现的位置正确, 参考http://stackoverflow.com/questions/38170366/leaflet-adjust-popup-to-picture-size
+                },
+                placeAjax() {
+                    // GET /someUrl
+                    this.$http.get('/api/places').then(response => {
+
+                        // get body data
+                        someData = response.body;
+                        // console.log(someData)
+                        for (index in someData) {
+                            var item = someData[index]
+                            // console.log(item.lat, item.lng, item.img)
+                            this.addMarker(item.lat, item.lng, item.img)
+                        }
+                    }, response => {
+                        // error callback
+                        console.log('error')
+                    });
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>

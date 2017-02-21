@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>图片上传</title>
+</head>
+
+<body>
+    <form action="{% url 'upload' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <p>
+            <input id="img_id" type="file" class="" name="img" multiple>
+        </p>
+        <input type="submit" value="Submit" />
+    </form>
+</body>
+
+</html>
