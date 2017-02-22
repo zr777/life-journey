@@ -9,7 +9,6 @@
     <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
     <script src="https://unpkg.com/vue/dist/vue.js"></script>
     <script src="https://cdn.jsdelivr.net/vue.resource/1.2.0/vue-resource.min.js"></script>
-    <!--leaflet markercluster component dependencies-->
     <script src="https://unpkg.com/leaflet.markercluster@1.0.3/dist/leaflet.markercluster.js"></script>
     <link href="//cdn.bootcss.com/leaflet.markercluster/1.0.0-rc.1.0/MarkerCluster.css" rel="stylesheet">
     <link href="//cdn.bootcss.com/leaflet.markercluster/1.0.0-rc.1.0/MarkerCluster.Default.css" rel="stylesheet">
@@ -23,6 +22,7 @@
     <a href="/upload">上传图片<a>
 
     <script>
+        var someData;
         var app = new Vue({
             el: '#mapid',
             data: {
@@ -32,7 +32,8 @@
                 this.$nextTick(function () {
                     // 代码保证 this.$el 在 document 中
                     this.initMap();
-                    this.placeAjax(); // ajax异步加载，注意信息同步
+                    this.placeAjax();
+                    this.mymap.addLayer(this.markers);  // this.markers.addTo(this.mymap);
                 })
             },
             methods: {
@@ -53,7 +54,6 @@
                     this.mymap.on('click', this.onMapClick);
 
                     this.markers = L.markerClusterGroup();
-                    this.latlngs = null;
                 },
                 onMapClick(e) {
                     this.popup
@@ -76,48 +76,19 @@
                         maxWidth: "auto"
                     }); //为了图片出现的位置正确, 参考http://stackoverflow.com/questions/38170366/leaflet-adjust-popup-to-picture-size
                     this.markers.addLayer(marker);
-
-                    // 产生最外围的边界
-                    if(this.latlngs == null){
-                        this.latlngs = [guangZhouTa, guangZhouTa, guangZhouTa, guangZhouTa]
-                    }
-                    if(lat>this.latlngs[0][0]){
-                        this.latlngs[0] = guangZhouTa;
-                    }
-                    if(lat<this.latlngs[2][0]){
-                        this.latlngs[2] = guangZhouTa;
-                    }
-                    if(lng>this.latlngs[1][1]){
-                        this.latlngs[1] = guangZhouTa;
-                    }
-                    if(lng<this.latlngs[3][1]){
-                        this.latlngs[3] = guangZhouTa;
-                    }
-                    
                 },
                 placeAjax() {
                     // GET /someUrl
                     this.$http.get('/api/places').then(response => {
 
                         // get body data
-                        var someData = response.body;
+                        someData = response.body;
                         // console.log(someData)
                         for (index in someData) {
                             var item = someData[index]
                             // console.log(item.lat, item.lng, item.img)
                             this.addMarker(item.lat, item.lng, item.img)
                         }
-
-                        this.mymap.addLayer(this.markers);  
-                        // this.markers.addTo(this.mymap);
-
-                        this.mymap.fitBounds(this.markers.getBounds());
-                        // this.mymap.fitBounds(latlngs);
-                        //console.log(this.latlngs);
-                        // L.polyline(this.latlngs).addTo(this.mymap);
-                        // L.polygon(this.markers.getBounds()).addTo(this.mymap); // no effect
-                        L.polygon(this.latlngs,{opacity:0.8, fillOpacity:0.05}).addTo(this.mymap);
-
                     }, response => {
                         // error callback
                         console.log('error')
