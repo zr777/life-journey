@@ -13,10 +13,6 @@
     <script src="https://unpkg.com/leaflet.markercluster@1.0.3/dist/leaflet.markercluster.js"></script>
     <link href="//cdn.bootcss.com/leaflet.markercluster/1.0.0-rc.1.0/MarkerCluster.css" rel="stylesheet">
     <link href="//cdn.bootcss.com/leaflet.markercluster/1.0.0-rc.1.0/MarkerCluster.Default.css" rel="stylesheet">
-    <!--font awesome-->
-    <link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-easybutton@2.0.0/src/easy-button.css">
-    <script src="https://unpkg.com/leaflet-easybutton@2.0.0/src/easy-button.js"></script>
 </head>
 
 <body>
@@ -37,7 +33,6 @@
                     // 代码保证 this.$el 在 document 中
                     this.initMap();
                     this.placeAjax(); // ajax异步加载，注意信息同步
-                    this.addButton();
                 })
             },
             methods: {
@@ -127,14 +122,7 @@
                         // error callback
                         console.log('error')
                     });
-                },
-                addButton() { 
-                    // https://github.com/CliffCloud/Leaflet.EasyButton
-                    L.easyButton('fa-refresh', this.refresh).addTo(this.mymap);
-                },
-                refresh() {
-                    this.mymap.fitBounds(this.latlngs);
-                },
+                }
             }
         })
     </script>
